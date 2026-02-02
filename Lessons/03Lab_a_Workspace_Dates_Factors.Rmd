@@ -102,9 +102,9 @@ Remember formatting of dates in R:
 # (code must be uncommented)
 today <- Sys.Date()
 format(today, format = "%B")
-#format(today, format = "")
-#format(today, format = "")
-#format(today, format = "")
+format(today, format = "%A")
+format(today, format = "%Y")
+format(today, format = "%b")
 
 ```
 
@@ -131,8 +131,8 @@ date_obj_today
 
 #Ex_3 - on your own...
 str_juneteenth <- "19 June 1865"
-#date_juneteenth <- ()
-#date_juneteenth
+date_juneteenth <- dmy(str_juneteenth)
+date_juneteenth
 ```
 ### The century issue
 
@@ -245,7 +245,7 @@ sites$dow <- factor(sites$dow)
 ## What class is the dow column now?
 class(sites$dow)
 
-#List the unique values in the column
+#List the unique values in the column #levels are a property of factors #the unique values that factors can take
 unique(sites$dow)
 
 #Summary - is it meaningful?
