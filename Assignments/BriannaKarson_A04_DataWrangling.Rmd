@@ -207,6 +207,8 @@ EPA_common_sites <-
     #parsing date
     mutate(Month = month(Date)) %>%
     mutate(Year = year(Date))
+
+dim(EPA_common_sites)
   
 #10 #separating ozone and PM2.5
 EPA_common_sites_widen <- 
@@ -260,8 +262,8 @@ dim(EPAair_summary)
 15. Why did we use the function `drop_na` rather than `na.omit`? Hint: replace `drop_na` with `na.omit` in part 13 and observe what happens with the dimensions of the summary date frame.
 
 > Answer: 
-"na.omit" returns the data will all incomplete rows removed. "drop_na" allows you to only drops rows where there are missing values in a specific column.
+"na.omit" returns the data with all incomplete rows removed. "drop_na" allows you to only drops rows where there are missing values in a specific column.
 
 16. Stage, commit, and push your Assignment to your GitHub account. Provide a link to your repository below.
 
-> Github repository URL: https:\\github.com\
+> Github repository URL: https://github.com/brianna-karson/EDE_Spring2026/blob/main/Assignments/BriannaKarson_A04_DataWrangling.Rmd
