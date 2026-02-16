@@ -26,6 +26,7 @@ library(ggridges)
 
 #Enhanced color ramps
 library(viridis)
+library(viridisLite)
 library(RColorBrewer)
 library(colormap)
 
@@ -76,7 +77,7 @@ ggsave(
 
 ```{r, message = FALSE, warning = FALSE}
 #Assign a variable to the processed data folder location
-processed_data = here("Data/Processed_KEY")
+processed_data = here("Data/Processed")
 
 #Read in data
 PeterPaul.chem.nutrients <- read.csv(
@@ -235,15 +236,31 @@ Exercise: build your own scatterplots of PeterPaul.chem.nutrients
 
 # 1. 
 # Plot surface temperatures by day of year. 
-# Color your points by year, and facet by lake in two rows.
+PeterPaul.chem.nutrients %>%
+  filter(depth == 0) %>%
+  ggplot(aes(
+    x = daynum,
+    y = temperature_C,
+    color = year4 #Color your points by year
+  )) +
+  geom_point() +
+  facet_wrap(vars(lakename), nrow=2) # facet by lake in two rows.
 # Change the ylab name
 
 #2. 
-# Plot temperature by date. Color your points by depth.
-# Change the size of your point to 0.5
-# Change the color palette to magma and play with direction (+- 1), which one makes more sense?
-# Change x axis to include marker/labels every 5 years
-
+PeterPaul.chem.nutrients %>%
+  ggplot(aes(
+    x = sampledate,
+    y = temperature_C, #Plot temperature by date
+    color = depth
+  )) + 
+  geom_point(size = 0.5) +  # Change the size of your point to 0.5
+  scale_color_viridis(option = 'magma', direction = -1) + #Color your points by depth 
+  # Change the color palette to magma and play with direction (+- 1)
+  scale_x_date(
+    date_labels = '%Y',
+    date_breaks = "5 years") 
+  # Change x axis to include marker/labels every 5 years
 
 ```
 ## Plotting the relationship between two continuous variables: Scatterplot
@@ -253,9 +270,10 @@ Exercise: Plot relationships between air quality measurements
 ```{r, fig.height = 3, fig.width = 4, warning = FALSE}
 
 # 3. 
+ggplot(EPAair)
 # Plot AQI values for ozone by PM2.5, colored by latitude 
-# Make the points 50 % transparent
-# Add a line of best fit for the linear regression of these variables.
+# Make the points 50 % transparent #alpha
+# Add a line of best fit for the linear regression of these variables. #geom_smooth
 
 
 ```
@@ -289,8 +307,23 @@ Neonics <- read.csv(
   stringsAsFactors = TRUE)
 
 ggplot(Neonics) +
-  geom_bar(aes(x = Endpoint))
+  geom_bar(
+    aes(x = reorder(Endpoint, Endpoint, FUN = length))) +
+  theme(
+      axis.text.x = element_text(
+        hjust = 0,
+        vjust = 0.5,
+        angle = -90)
+  )
 
-
-
+#tidier -- uses forcats
+ggplot(Neonics) + 
+  geom_bar(
+    aes(x = fct_rev(fct_infreq(Endpoint)))) + 
+  theme(
+    axis.text.x = element_text(
+      hjust = 0,
+      vjust = 0.5,
+      angle = -90)
+    )
 ```
