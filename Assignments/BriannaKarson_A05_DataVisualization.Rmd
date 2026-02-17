@@ -1,6 +1,6 @@
 ---
 title: "Assignment 5: Data Visualization"
-author: "Student Name"
+author: "Brianna Karson"
 date: "Spring 2026"
 output: pdf_document
 geometry: margin=2.54cm
@@ -31,9 +31,28 @@ This exercise accompanies the lessons in Environmental Data Analytics on Data Vi
 2. Make sure R is reading dates as date format; if not change the format to date.
 
 ```{r initialize project}
-#1 
+#1  
 
-#2 
+#loading packages
+library(here)
+library(tidyverse)
+library(cowplot)
+here()
+getwd()
+
+#loading data
+PeterPaul.chem.nutrients <- read.csv(
+  here("./Data/Processed_KEY/NTL-LTER_Lake_Chemistry_Nutrients_PeterPaul_Processed.csv"),
+  stringsAsFactors = TRUE)
+
+NIWOT.litter <- read.csv(here("./Data/Processed_KEY/NEON_NIWO_Litter_mass_trap_Processed.csv"),
+stringsAsFactors = TRUE)
+
+#2 #fixing dates
+PeterPaul.chem.nutrients$sampledate <-   
+  ymd(PeterPaul.chem.nutrients$sampledate)
+
+NIWOT.litter$collectDate <- ymd(NIWOT.litter$collectDate)
 
 ```
 ## Define your theme
@@ -45,8 +64,14 @@ This exercise accompanies the lessons in Environmental Data Analytics on Data Vi
  * Legend
 
 ```{r build plot theme}
-#3
-
+#3 
+mytheme <- theme_minimal(base_size = 12) +
+  #customizing axis labels and titles
+  theme(axis.text = element_text(color = "black"),
+        axis.title = element_text(color = "darkblue"),
+        #customizing legend position
+        legend.position = "top",
+        plot.title = element_text(face = "bold", size = 14)) 
 ```
 
 ## Create graphs
@@ -56,6 +81,21 @@ For numbers 4-7, create ggplot graphs and adjust aesthetics to follow best pract
 
 ```{r plot total P vs PO4}
 #4 
+PeterPaul.chem.nutrients %>%
+  #plotting total phosphorus by phosphate
+  #separate aesthetics for each lake
+  ggplot(aes(x = po4, y = tp_ug, color = lakename)) + 
+  labs(x = "Phosphate (µg/L)", 
+       y = "Total Phosphorus (µg/L)",
+       color = "Lake Name",
+       title = "Plotting Total Phosphorus by Phosphate") + 
+  theme_set(mytheme) + 
+  geom_point(size = 0.5) +
+    #adding lines of best fit
+  geom_smooth(method = lm, show.legend = FALSE, linewidth = 0.5 ) +
+  xlim(0,40) +
+  ylim(0,150)
+  #hiding extreme values
 
 ```
 
@@ -68,14 +108,75 @@ Tips:
 * Setting a legend's position to "none" will remove the legend from a plot.
 * Individual plots can have different relative sizes when combined using `cowplot`.
 
-```{r Create boxplots}
-#5 
+```{r fig.height = 8, fig.width = 6}
+#5  #plotting temperature
+temp_plot <- PeterPaul.chem.nutrients %>%
+  mutate(month_f = factor(
+    month,
+    level = 1:12,
+    labels = month.abb)) %>%
+  ggplot(aes(x = month_f, 
+             y = temperature_C, 
+             color = lakename)) + 
+  theme_set(mytheme) +
+    theme(axis.title.x = element_blank(), 
+        axis.text.x = element_blank(),
+        axis.title.y = element_text(size = 12)) + 
+  geom_boxplot(size = 0.5) + 
+  labs(x = "Month", 
+       y = "Temperature",
+       title = "Plotting Temperature, Total Nitrogen, 
+       and Total Phosphorus by Month",
+       color = "Lake Name") + 
+   scale_x_discrete(drop=F)
 
+#plotting total phosphorus
+tp_plot <- PeterPaul.chem.nutrients %>%
+  mutate(month_f = factor(
+    month,
+    level = 1:12,
+    labels = month.abb)) %>%
+  ggplot(aes(x = month_f, 
+             y = tp_ug, 
+             color = lakename)) +
+  theme_set(mytheme) + 
+  theme(axis.title.x = element_blank(), 
+        axis.text.x = element_blank(),
+        axis.title.y = element_text(size = 12)) + 
+  geom_boxplot(show.legend = FALSE, 
+               size = 0.5,
+               outlier.size = 0.5) + 
+  labs(y = "Total Phosphorus (µg/L)") +
+scale_x_discrete(drop=F)
+
+#plotting total nitrogen
+tn_plot <-PeterPaul.chem.nutrients %>%
+  mutate(month_f = factor(
+    month,
+    level = 1:12,
+    labels = month.abb)) %>%
+  ggplot(aes(x = month_f, 
+             y = tn_ug, 
+             color = lakename)) +
+  theme_set(mytheme) + 
+   theme(axis.title.y = element_text(size = 12),
+     axis.text.x = element_text(
+        hjust = 0,
+        vjust = 0.5,
+        angle = -90)) +
+  geom_boxplot(show.legend = FALSE, 
+               size = 0.5,
+               outlier.size = 0.5) + 
+  labs(x = "Month", 
+       y = "Total Nitrogen (µg/L)") +
+  scale_x_discrete(drop=F)
+
+plot_grid(temp_plot, tp_plot, tn_plot, ncol = 1, align = 'v')
 ```
 
 Question: What do you observe about the variables of interest over seasons and between lakes? 
 
-> Answer: 
+> Answer: The mean total nitrogen and total phosphorus is generally higher in Peter Lake compared to Paul Lake. Peter Lake also has greater data variance for each of these variables. The summer months of June, July, and August have a trend of higher temperatures and total phosohorus, though I am not able to detect a seasonal trend for total nitrogen. 
 
 6. [Niwot Ridge] Plot a subset of the litter dataset by displaying only the "Needles" functional group. Plot the dry mass of needle litter by date and separate by NLCD class with a color aesthetic. (no need to adjust the name of each land use)
 
@@ -83,12 +184,39 @@ Question: What do you observe about the variables of interest over seasons and b
 
 ```{r Plot litter}
 #6
-
+needles_plot <- 
+  #subsetting needles only
+  ggplot(subset(NIWOT.litter, functionalGroup == "Needles"),
+         #plotting dry mass by date
+         aes(x = collectDate,
+             y = dryMass, 
+             #separating NLCD by color
+             color = nlcdClass)) + 
+  theme_set(mytheme) + 
+  geom_point(size = 0.75) + 
+  labs(x = "Date", 
+       y = "Needle Litter Dry Mass", 
+       color = "Land Cover Class",
+       title = "Plotting Needle Litter Dry Mass by Date")
+  print(needles_plot)
 
 #7
-
-
+needles_plot_NLCD <- 
+  #subsetting needles only
+  ggplot(subset(NIWOT.litter, functionalGroup == "Needles"),
+         #plotting dry mass by date
+         aes(x = collectDate,
+             y = dryMass)) + 
+  theme_set(mytheme) + 
+  geom_point(size = 0.75) + 
+  labs(x = "Date", 
+       y = "Needle Litter Dry Mass",
+       title = "Plotting Needle Litter Dry Mass by Date
+       and Land Cover Class") + 
+  #separating by facet
+  facet_wrap(vars(nlcdClass), nrow=3) # facet by NLCD in three rows
+  print(needles_plot_NLCD)
 ```
 Question: Which of these plots (6 vs. 7) do you think is more effective, and why? 
 
-> Answer:
+> Answer: I find plot 6 to be more effective, because the different colors allow us to more directly visually compare the distribution of dry mass of needle litter according to the different land cover classes. Plot 7, though allowing for a more detailed view of each land cover class, almost provides too much to look at, making it hard to draw conclusions.   
