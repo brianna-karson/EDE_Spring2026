@@ -3,12 +3,14 @@ title: Interactive Rmd
 output: html_document
 runtime: shiny
 ---
-  
+
 ```{r, echo = FALSE}
+
 numericInput("n",
 "How many cars?", 5)
+
+#react to changes in webpage
 renderTable({
 head(cars, input$n)
 })
 ```
-
