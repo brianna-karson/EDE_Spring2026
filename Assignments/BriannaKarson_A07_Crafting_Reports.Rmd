@@ -153,6 +153,9 @@ print(plot2)
 Add a **table of contents** and **list of figures** to your document and knit to a PDF. Submit your PDF to Canvas, but also be sure to commit and push your Rmd file used to create this knit document to GitHub. In the section below, add a link to your GitHub repository. **Lastly, add the statement that you did not use AI in the completion of this assignment followed by your name and the date.** 
 
 ## Git Repository
+https://github.com/brianna-karson/EDE_Spring2026/commit/b8f922d7413946e8ded4dea1a5e61393235d2c8b
+
 I did not use AI in the completion of this assignment
+
 
 Brianna Karson, 3/1/2026
